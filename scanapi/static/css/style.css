@@ -1,0 +1,17 @@
+header {
+	background-color: #2b2927;
+	margin-bottom: 40px;
+    overflow: hidden;
+    color: #D3D3D3;
+}
+
+header-h1 {
+    padding-left: 50px;
+}
+
+body {
+	font: normal 18px/1.5 "Montserrat", helvetica, arial, sans-serif;
+}
+
+
+

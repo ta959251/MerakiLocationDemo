@@ -1,0 +1,92 @@
+<html lang="en">
+{% load leaflet_tags %}
+<head>
+  
+  {% leaflet_js %}
+  {% leaflet_css %}
+  {% block title %}<title>Bender</title>{% endblock %}
+    <script src="https://cdn-webgl.wrld3d.com/wrldjs/dist/latest/wrld.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.1/leaflet.css" rel="stylesheet" />
+    <link href="https://cdn-webgl.wrld3d.com/wrldjs/addons/resources/latest/css/wrld.css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <script src="https://cdn-webgl.wrld3d.com/wrldjs/addons/indoor_control/latest/indoor_control.js"></script>
+  <!-- Add additional CSS in static file -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+    <header>
+        <h1 style="header-h1">
+        {% if client %}
+        Hello {{client.user}}
+        {% else %}
+        Hello stranger.
+        {% endif %}
+        <h1>
+    </header>
+    {% if news %}
+        {% if client %}
+        <h2>Last news for {{client.tags.office}}</h2>
+        {% endif %}
+        <ul>
+            {% for item in news %}
+            <li>[{{item.timestamp}}] {{ item.news }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    {% if client %}
+    <div style="position: relative; height: 70%; width=50%;">
+    <div id="overlay" class="wrld-widget-container"></div>
+    <div id="map"></div>
+    </div>
+    <script type="text/javascript">
+      var mapId = "{{client.tags.map}}"
+      var floorId = {{client.tags.floor}}
+      console.log(mapId)
+      console.log(floorId)
+
+      var pos = [{{client.location.lat}}, {{client.location.lng}}]
+      var unc = {{client.location.unc}}
+      var map = L.Wrld.map("map", "{{apikey}}",
+          { center: pos,
+            zoom: 18,
+            indoorsEnabled: true,
+          }
+      )
+      
+     map.indoors.on("indoormapenter", () => {
+        map.indoors.setFloor(floorId - 1)
+        map.setView(pos, 20);
+        L.circle(pos, {
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 0.15,
+          radius: unc,
+          stroke: false,
+          indoorMapId: mapId,
+          indoorMapFloorId: floorId
+        }).addTo(map);
+      
+        L.circle(pos, {
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 1.0,
+          radius: 1.0,
+          indoorMapId: mapId,
+          indoorMapFloorId: floorId
+        }).addTo(map);
+        
+      })
+
+      map.on("initialstreamingcomplete", () => {
+        map.indoors.enter(mapId)                
+      })
+      var indoorControl = new WrldIndoorControl("overlay", map);
+    </script>
+    {% endif %}
+
+</body>
+</html>
